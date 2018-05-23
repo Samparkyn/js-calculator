@@ -3,13 +3,14 @@ document.addEventListener("DOMContentLoaded", startApp)
 let numbers
 let operators
 let clearButton
+let equalsButton
+let decimalButton
 let displayNum = ''
 let currentNum = ''
 let oldNum = ''
 let storedOperator = ''
-let storedEntriesArray = []
 let resultNum
-let equalsButton
+let storedEntriesArray = []
 
 const operatorFunctions = {
   '+': function(a, b) { return parseFloat(a) + parseFloat(b) }, // add
@@ -23,6 +24,7 @@ function startApp() {
   operators = Array.from(document.getElementsByClassName('operator'))
   clearButton = document.getElementById('clear')
   equalsButton = document.getElementById('equals')
+  decimalButton = document.getElementById('decimal')
   addListeners()
 }
 
@@ -30,6 +32,7 @@ function startApp() {
 function addListeners() {
   clearButton.addEventListener('click', clearScreen)
   equalsButton.addEventListener('click', calculate)
+  decimalButton.addEventListener('click', handleDecimalClick)
   numbers.map(number => number.addEventListener('click', handleNumberClick))
   operators.map(number => number.addEventListener('click', handleOperatorClick))
 }
@@ -37,13 +40,7 @@ function addListeners() {
 
 function handleNumberClick (e) {
   const numClicked = e.target.value
-  if (resultNum) { 
-    currentNum = numClicked
-    resultNum = ''
-  } else { 
-    currentNum += numClicked
-  }
-
+  currentNum += numClicked
   displayNum += numClicked
   storedEntriesArray.push(numClicked)
   console.log('currentNum inside number click', currentNum)
@@ -51,15 +48,27 @@ function handleNumberClick (e) {
 }
 
 
-function handleOperatorClick (e) {
+function handleOperatorClick(e) {
   const operator = e.target.value
   storedOperator = operator
-  oldNum = currentNum
+  
+  if (resultNum) {
+    oldNum = resultNum
+  } else {
+    oldNum = currentNum
+  }
+
   storedEntriesArray.push(operator)
   console.log('old num indside operater click', oldNum)
   currentNum = ''
   displayNum = ''
   displayOperator()
+}
+
+
+function handleDecimalClick(e) {
+  let displayScreen = document.getElementById('display')
+  displayScreen.value = e.target.value
 }
 
 
@@ -77,25 +86,33 @@ function displayOperator() {
 
 function clearScreen() {
   let displayScreen = document.getElementById('display')
-  displayNum = []
-  storedOperator = []
+  displayNum = ''
+  currentNum = ''
+  storedOperator = ''
+  storedEntriesArray = []
   displayScreen.value = displayNum
   console.log(displayNum)
 }
 
 function calculate() {
   let displayScreen = document.getElementById('display')
-  oldNum = parseFloat(oldNum);
-  currentNum = parseFloat(currentNum);
-  resultNum = operatorFunctions[storedOperator](oldNum, currentNum)
-  displayNum = resultNum
-  displayScreen.value = displayNum
-  console.log('oldNum', oldNum)
-  console.log('currentNum', currentNum)
-  console.log('operater used', storedOperator)
-  console.log('displayNum', displayNum)
-  console.log('resultNum', resultNum)
-  console.log('stored entries arry', storedEntriesArray)
-  return resultNum
+  if (currentNum && oldNum) {
+    oldNum = parseFloat(oldNum);
+    currentNum = parseFloat(currentNum);
+    resultNum = operatorFunctions[storedOperator](oldNum, currentNum)
+    displayScreen.value = resultNum
+    oldNum = resultNum
+    console.log('= was pressed')
+    console.log('oldNum & currentNum', oldNum, storedOperator, currentNum)
+    console.log('displayNum', displayNum)
+    console.log('resultNum', resultNum)
+    console.log('stored entries arry', storedEntriesArray)
+    return resultNum
+  } else {
+    displayNum = currentNum
+    resultNum = currentNum
+  }
+
+  
 }
 
